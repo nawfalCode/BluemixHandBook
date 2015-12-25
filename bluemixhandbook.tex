@@ -1,8 +1,13 @@
 \documentclass[]{article}
-
+\usepackage{graphicx}
+\usepackage{natbib}
+ \usepackage{url}
+ \usepackage{hyperref}
+ 
 %opening
 \title{Hand Book for BlueMix }
 \author{}
+
 
 \begin{document}
 
@@ -13,5 +18,25 @@
 \end{abstract}
 
 \section{}
+
+When you manage images or containers from the command line, you must have your private Bluemix repository URL. You can view your namespace and see how it is used to construct your private Bluemix repository URL. When you manage containers from the Bluemix user interface, you are not required to have this information to complete tasks.
+
+When you manage containers, you should be familiar with namespaces and private repositories.
+\begin{itemize}
+
+\item Namespace: A unique name to identify your private repository within the Bluemix registry. The namespace is assigned one time for an organization and cannot be changed after it is created.
+\item Private Bluemix image repository: The Bluemix registry domain with the namespace of the organization's repository. When you run commands, use the full private Bluemix repository when you refer to an image. You can format your image paths like the following example.
+\end{itemize}
+
+\framebox{cf ic run -p $<$port$>$--name $<$containername$>$registry.ng.bluemix.net/$<$namespace$>$/$<$image name$>$ } 
+
+\subsection{Docker user}
+Important: By default, the ice commands must be run with root authentication and therefore, require the prefix sudo. If you want to run docker and ice commands without sudo, run the following command, where <CURRENTUSER> is the name of the current user, then, if you are on Linux, you must log out then log back in again.
+
+\framebox{sudo usermod -a -G docker $<$CURRENTUSER$>$ }
+
+\bibliographystyle{unsrt}
+\bibliography{aneka}
+
 
 \end{document}
