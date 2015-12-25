@@ -1,3 +1,3 @@
-# BluemixHandBook
+# Bluemix HandBook
 Bluemix Hand Book
 
