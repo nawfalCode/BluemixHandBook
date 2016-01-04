@@ -1,21 +1,37 @@
-\documentclass[]{article}
+\documentclass[]{book}
 \usepackage{graphicx}
 \usepackage{natbib}
  \usepackage{url}
  \usepackage{hyperref}
- 
+
 %opening
 \title{Hand Book for BlueMix }
 \author{}
+
+\usepackage{listings,color}
+
+\definecolor{verbgray}{gray}{0.9}
+
+\lstnewenvironment{code}{%
+  \lstset{backgroundcolor=\color{verbgray},
+  frame=single,
+  framerule=0pt,
+  basicstyle=\ttfamily,
+  columns=fullflexible}}{}
+
+\definecolor{shadecolor}{rgb}{.9, .9, .9}
 
 
 \begin{document}
 
 \maketitle
 
-\begin{abstract}
 
-\end{abstract}
+\chapter{Introduction}
+
+\section{Install Cloud Foundry CLI}
+
+First yo need to install the 
 
 \section{}
 
@@ -35,8 +51,302 @@ Important: By default, the ice commands must be run with root authentication and
 
 \framebox{sudo usermod -a -G docker $<$CURRENTUSER$>$ }
 
+\chapter{Docker Files}
+\label{sec:dockerfileschapter}
+
+\section{The FROM instruction}
+The first instruction of every Dockerfile needs to be the FROM instruction
+\begin{code}
+FROM image
+\end{code}
+
+
+It sets the base image for subsequent instructions.
+Example:
+\begin{code}
+FROM ubuntu
+\end{code}
+\section{The RUN Instruction}
+
+The RUN instruction will execute any commands on the current image and commit the results. The resulting committed image will be used for the next step in the Dockerfile.
+Layering RUN instructions and generating commits conforms to the core concepts of Docker where commits are cheap and containers can be created from any point in an image’s history, much like source control.
+\begin{code}
+RUN command
+\end{code}
+
+RUN command is equivalent to the docker commands: docker run image command + docker commit container\_id, Where image would be replaced automatically with the current image, and container\_id would be the result of the previous RUN instruction.
+Example:
+\begin{code}
+RUN apt-get install -y memcached
+\end{code}
+
+As we saw earlier, we need to have the FROM instruction before any RUN instruction, so that docker knows from which base image to start running the instruction on. For instance:
+\begin{code}
+FROM ubuntu
+RUN apt-get install -y memcached
+\end{code}
+
+\chapter{Bluemix Runtimes}
+\label{sec:runtimes}
+\section{Java Liberty}
+\label{sec:javaliberty}
+I need to login to my Bluemix account in order to upload my application. 
+
+\begin{code}
+cf login -a https://api.ng.bluemix.net -o organization -s space -u username -p password
+\end{code}
+
+Now to push the application, you have to use this command: 
+\begin{code}
+cf push application-name path-to-app -m 512
+\end{code}
+
+to access the app (which is web app), follow this link:
+\begin{code}
+application-name.bluemix.net
+\end{code}
+
+
+
+
+
+
+
+
+cf push has the following options: 
+
+\begin{tabular}{l  l p{8cm} }
+-d&:& Domain\\
+ -m &: & Memory limit (e.g. 256M, 1024M, 1G)\\
+--health-check-type, -u      &:& Application health check type (e.g. port or none) \\
+   -k& :&  Disk limit (e.g. 256M, 1024M, 1G)\\
+-s & : & Stack to use (a stack is a pre-built file system, including an operating system, that can  apps)\\   
+    -t & : & Maximum time (in seconds) for CLI to wait for application start, other server side timeouts may apply\\
+--docker-image, -o & : & docker-image to be used (e.g. user/docker-image-name)\\
+-b& : &  Custom buildpack by name (e.g. my-buildpack) or GIT URL (e.g. 'https://github.com/heroku/heroku-buildpack-play.git') or GIT BRANCH URL (e.g. 'https://github.com/heroku/heroku-buildpack-play.git\#develop' for 'develop' branch). Use built-in buildpacks only by setting value to 'null' or 'default'\\
+-c&:& Startup command, set to null to reset to default start command\\
+-f&:&    Path to manifest\\
+-i &:& Number of instances\\
+-n &:& Hostname (e.g. my-subdomain)\\
+-p &:& Path to app directory or to a zip file of the contents of the app directory\\
+--random-route &:& Create a random route for this app\\
+--no-manifest &:& Ignore manifest file\\
+--no-hostname  &:& Map the root domain to this app\\
+--no-route &:& Do not map a route to this app and remove routes from previous pushes of this app.\\
+--no-start &:& Do not start an app after pushing\\
+\end{tabular}
+
+To get the full list of build packs that are supported by Bluemix, use: 
+\begin{code}
+cf buildpacks
+\end{code}
+
+
+Java App: \underline{cf push appname -b liberty-for-java} or \underline{cf push appname -b java\_buildpack}
+
+Node.js: \underline{cf push appname -b sdk-for-nodejs} or\underline{ cf push appname -b nodejs\_buildpack}
+
+Ruby: \underline{cf push appname -b ruby\_buildpack}
+
+There are a bunch of other languages supported as well.
+
+For a list head over to https://github.com/cloudfoundry-community/cf-docs-contrib/wiki/Buildpacks.
+
+If for example you wanted to use PHP you would do the following. cf push -b https://github.com/cloudfoundry/php-buildpack.git
+
+If you wanted to do Go you would do the following. cf push appname -b https://github.com/cloudfoundry/go-buildpack.git
+[http://stackoverflow.com/questions/27506058/not-able-to-push-my-local-app-to-bluemix]
+
+
+
+
+to push/deploy/upload a project to Bluemix use:
+\begin{code}
+cf push
+\end{code}
+
+
+To get the namespace you need first to login to cf:
+\begin{code}
+cf login -u nawfalbluemix1@gmail.com -p Asdf_098 -a api.ng.bluemix.net -
+\end{code}
+
+then login to \textbf{ic} service using: 
+\begin{code}
+cf ic login
+\end{code}
+
+to build a container :
+\begin{code}
+cf ic build -t registry.ng.bluemix.net/myorg8080/nawfal-node-centos .
+\end{code}
+
+
+To list all the available applications:
+\begin{code}
+cf apps
+\end{code}
+
+To delete an application:
+\begin{code}
+cf delete APP_NAME
+\end{code}
+
+To start an application: 
+\begin{code}
+cf start APP_NAME
+\end{code}
+
+to stop an application:
+\begin{code}
+cf stop APP_NAME
+\end{code}
+
+
+
+
+to increase the number of instances of an application (i.e. horizontal scale), we need to get the application name first by: 
+\begin{code}
+cf apps
+\end{code}
+
+then we need to call this where 2 is the required number of instances: 
+\begin{code}
+cf scale APP_NAME -i 2
+\end{code}
+
+To do a vertical scale, increase the size of memory, for instance: 
+\begin{code}
+cf scale APP_NAME -m 512M
+\end{code}
+
+to increase the disk size:
+\begin{code}
+cf scale APP_NAME -k 10G
+\end{code}
+
+
+\section{SDK for Node.js}
+\section{Go Community}
+\section{PHP Community}
+\section{Python Community}
+\section{Ruby Community}
+\section{Community builpacks Community}
+
+\chapter{Boilerplate}
+\label{sec:Boilerplate}
+
+\section{Internet of Things Foundation Starter}
+\label{sec:InternetofThingsFoundationStarter}
+
+IBM Bluemix provides an Internet of Things (IoT) starter application for you to get up and running with an Internet of Things Foundation (IoTF) application, by using \hyperref[nodered]{Node-RED} in Bluemix. You can try the sample flow with a simulator and customize it for your own devices \cite{herukogithub}.
+
+Node-RED provides a browser-based flow editor that makes it easy to wire together devices, APIs, and online services by using the wide range of nodes in the palette. Flows can then be deployed to the Node.js runtime environment with a single click. Included in this sample is a ready-made flow that can process temperature readings from a simulated device. The flow checks these temperature readings against a threshold, then indicates whether the temperature is safe. Use this sample as a starting point for creating your own IoT flows.
+
+
+\subsection{Usage}
+
+To use the Internet of Things starter from the Bluemix user interface, complete the following steps:
+\begin{enumerate}
+
+
+\item Create an Internet of Things starter application by taking the following steps:
+\begin{enumerate}
+\item Select the Internet of Things Foundation Starter from the boilerplates section of the catalog, and click View More.
+
+\item Provide the application name, modify the host name, if required, and click Create.
+\end{enumerate}
+\item After a short wait, your application starts.
+
+\end{enumerate}
+
+When your application starts, click the Routes URL or enter this URL in a browser:
+\begin{code}
+http://<yourhost>.mybluemix.net
+\end{code}
+You arrive at the Node-RED for Internet of Things landing page.
+
+Click Go to your Node-RED flow editor.
+
+You see a ready-made flow that can process temperature readings from a simulated device.
+
+\subsection{Set up the simulated device}
+Guidelines on how to set up the simulated device
+
+\begin{enumerate}
+
+
+\item To open a simulator, browse to \href{https://quickstart.internetofthings.ibmcloud.com/iotsensor/}{IoT Sensor} in a new browser window or on a mobile device.
+
+\begin{enumerate}
+\item 	Alternatively, enter this URL in a browser: \url{http://quickstart.internetofthings.ibmcloud.com/iotsensor}
+\end{enumerate}
+\item Click the MAC address in the upper right hand corner of the simulator to visualize the simulator data in the Internet of Things application. The MAC address is something like AF:01:C7:BB:E5:72
+\begin{enumerate}
+\item 	Adjust the humidity, object temperature, and temperature on the simulator to see the chart update in the start screen.
+\end{enumerate}
+\item Return to your Node-RED workspace and double-click the IBM IoT App In node to open the configuration dialog. In the Authentication type field, select start from the pull-down list. Remove the colons from the MAC address and enter it in the Device ID field and click OK. Make sure that the MAC address is entered in lowercase, and that there are no leading or trailing space characters.
+\item Look for the deploy button in the upper right hand corner of your Node-RED workspace. The deploy button is now red; click it to deploy your flow.
+\item Open the debug pane on the right. You will see that the flow is generating Temperature Status messages.
+\item Increase the temperature value on the simulator to see the messages change in the debug pane. Note that a different message appears if the temperature exceeds 40 degrees.
+
+\end{enumerate}
+
+\subsection{Modifying the sample flow}
+
+Now you can modify your working flow to achieve business goals. Here are some examples:
+\begin{enumerate}
+\item Double-click the temp thresh node and you see the rules that are used to determine whether the temperature is in safe limits or not. You can modify the behavior of the flow by changing these rules, clicking OK, and then clicking the red Deploy button to change the running instance of the flow.
+\item Double-click the temp node to see how it extracts the temperature value from the raw JSON data that is coming in from the device. You might modify this node to extract other values, such as humidity, or you might create a second function node to extract humidity and wire that up to the IBM IoT App In node in parallel to the existing temp node.
+\item Wire in a node that notifies mobile users when the temperature threshold is exceeded. For more information see, \href{https://www.ng.bluemix.net/docs/services/IoT/index.html#iot130}{Using the IBM Push service in Node-RED}.
+\end{enumerate}
+
+\subsection{Using your own devices}
+You can create applications with devices registered to the IBM Internet of Things Foundation.
+
+Sign up to the Internet of Things Foundation through Bluemix by using the \href{https://www.ng.bluemix.net/docs/services/IoT/index.html#gettingstartedtemplate}{Internet of Things Service}.
+
+To create applications with devices registered to the Internet of Things Foundation:
+
+\begin{enumerate}
+\item Bind an instance of the Internet of Things service to the application.
+\item Register devices to your IoTF organization by starting IoTF from the dashboard that is provided by this service.
+\item Configure the IBM IoT App In node with the identification of your device, then in the Authentication type field, select Bluemix service. You notice that this node offers more options now that your Node-RED flow is bound to the IBM Internet of Things Foundation Service. You can click the Any check box to select all your devices.
+\item You can also use the IBM Iot App Out node to send commands to your registered device.
+\item For more information, see \href{https://internetofthings.ibmcloud.com/#/}{Internet of Things Foundation docs}.
+\end{enumerate}
+
+\subsection{Securing the flow editor}
+By default, the editor is open for anyone to access and modify flows. Follow these steps to password-protect the editor:
+
+\begin{enumerate}
+\item In the Bluemix dashboard, select the Environment Variables page for your application.
+\item Add the following user-defined variables:
+\begin{itemize}
+\item NODE\_RED\_USERNAME - the username to secure the editor with
+\item NODE\_RED\_PASSWORD - the password to secure the editor with
+\end{itemize}
+\item Click Save.
+\end{enumerate}
+\subsection{Adding nodes and packages to Node-RED in IBM Bluemix}
+Adding more nodes or packages to your Node-RED instance within the Internet of Things Foundation boilerplate adds extra functions.
+
+Packages contain nodes and any required dependencies. Adding nodes and packages to your Node-RED instance within IBM Bluemix increases the functionality of your Internet of Things Foundation boilerplate. The same procedure can be used to add either packages or nodes.
+\begin{enumerate}
+\item Open your Internet of Things Foundation application in the IBM Bluemix dashboard.
+\item Click Start Coding in the menu bar on the left.
+\item Follow the steps for Customizing your Node-RED intsance in the Start Coding page to download your application.
+\item Open your local version of package.json and add the package or node name you wish to add to the Dependencies section, followed by the version number. "node-red-contrib-mqttssl":"latest"
+\item Using the Cloud Foundry Command Line Interface, push your application to IBM Bluemix to update it. After you push the application to IBM Bluemix, your application will be restaged.
+\item The new package or node is now available in the Node-RED palette.
+\end{enumerate}
+You have added a node or package to your Node-RED instance in IBM Bluemix.
+
+
+\section{Node-RED}
+\label{nodered}
 \bibliographystyle{unsrt}
-\bibliography{aneka}
+\bibliography{bluemixHB}
 
 
 \end{document}
